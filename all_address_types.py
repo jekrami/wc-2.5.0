@@ -424,7 +424,7 @@ if __name__ == "__main__":
         ensure_dependencies()
         
         # Your seed phrase - replace with your own
-        my_mnemonic = "alpha burger swapped fewer hospitaal cast promote album change scrub divorced exit"
+        my_mnemonic = "alpha burger swapped few hospital cast promote album change scrub divorce exit"
         
         # Create an AddressGenerator instance
         generator = AddressGenerator(
