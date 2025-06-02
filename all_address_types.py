@@ -7,6 +7,7 @@ import hmac
 import binascii
 import subprocess
 import sys
+import csv
 from typing import List, Dict, Any, Optional
 
 # Function to ensure all dependencies are installed
@@ -320,12 +321,13 @@ class AddressGenerator:
             "P2WSH-P2PKH": self.get_p2wsh_p2pkh_address(key)
         }
     
-    def generate_addresses_for_common_paths(self, num_addresses: int = 10) -> Dict[str, List[Dict[str, str]]]:
+    def generate_addresses_for_common_paths(self, num_addresses: int = 10, output_csv: Optional[str] = None) -> Dict[str, List[Dict[str, str]]]:
         """
-        Generate addresses for common Bitcoin derivation paths
+        Generate addresses for common Bitcoin derivation paths and optionally save them to a CSV file
 
         Args:
             num_addresses: Number of addresses to generate per path type
+            output_csv: Path to the CSV file to save addresses (optional)
         
         Returns:
             Dictionary of path types and lists of address information
@@ -339,7 +341,8 @@ class AddressGenerator:
         ]
         
         results = {}
-        
+        all_addresses = []
+
         # For each path type
         for path_info in path_prefixes:
             path_type = path_info["type"]
@@ -352,15 +355,25 @@ class AddressGenerator:
                 path = f"{prefix}/0/{i}"
                 addr_info = self.generate_all_address_types(path)
                 path_results.append(addr_info)
+                all_addresses.extend([address for addr_type, address in addr_info.items() if addr_type not in ["path", "private_key"]])
             
             # Generate internal/change addresses (change=1)
             for i in range(num_addresses):
                 path = f"{prefix}/1/{i}"
                 addr_info = self.generate_all_address_types(path)
                 path_results.append(addr_info)
+                all_addresses.extend([address for addr_type, address in addr_info.items() if addr_type not in ["path", "private_key"]])
             
             results[path_type] = path_results
-        
+
+        if output_csv:
+            with open(output_csv, mode='w', newline='', encoding='utf-8') as csvfile:
+                writer = csv.writer(csvfile)
+                writer.writerow(["Address"])
+                for address in all_addresses:
+                    writer.writerow([address])
+            print(f"CSV file '{output_csv}' has been created successfully.")
+
         return results
 
 
@@ -411,17 +424,24 @@ if __name__ == "__main__":
         ensure_dependencies()
         
         # Your seed phrase - replace with your own
-        my_mnemonic = "abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon about"
+        my_mnemonic = "alpha burger swapped fewer hospitaal cast promote album change scrub divorced exit"
         
-        # Print all address types
-        print_addresses(
+        # Create an AddressGenerator instance
+        generator = AddressGenerator(
             mnemonic=my_mnemonic,
             passphrase="",
-            skip_validation=True,  # Set to True for non-BIP39 mnemonics
-            num_addresses=5        # Generate 5 addresses per path type
+            skip_validation=True  # Set to True for non-BIP39 mnemonics
         )
+        
+        # Generate addresses and save them to a CSV file
+        generator.generate_addresses_for_common_paths(
+            num_addresses=5,  # Generate 5 addresses per path type
+            output_csv="addresses.csv"  # Save addresses to addresses.csv
+        )
+        
+        print("Addresses have been saved to addresses.csv")
     
     except Exception as e:
         print(f"Error: {str(e)}")
         import traceback
-        traceback.print_exc() 
+        traceback.print_exc()
