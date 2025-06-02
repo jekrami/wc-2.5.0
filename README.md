@@ -146,7 +146,7 @@ For non-standard seed phrases that don't conform to the BIP39 specification:
 Example with a non-BIP39 seed phrase:
 
 ```python
-non_standard_seed = "alpha burger swapped fewer hospitaal cast promote album change scrub divorced exit"
+non_standard_seed = "abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon about"
 print_addresses(mnemonic=non_standard_seed, skip_validation=True)
 ```
 
